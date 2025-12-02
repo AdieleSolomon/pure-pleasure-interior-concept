@@ -1402,6 +1402,7 @@ footer {
     justify-content: center;
     opacity: 0;
     transition: opacity 0.3s ease;
+    -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
 }
 

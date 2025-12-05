@@ -1,36 +1,54 @@
-// Mobile Navigation Toggle
-const menuToggle = document.querySelector('.menu-toggle');
-const navLinks = document.querySelector('.nav-links');
+// Mobile Navigation Toggle - Wrapped in function for deferred execution
+function initializeNavigation() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
 
-menuToggle.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
-});
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
 
-// Close mobile menu when clicking on a link
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-    });
-});
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
 
-// Close mobile menu when clicking outside
-document.addEventListener('click', (e) => {
-    if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-        navLinks.classList.remove('active');
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+                navLinks.classList.remove('active');
+            }
+        });
     }
-});
+}
 
-// Modal Elements
-const modal = document.getElementById('designModal');
-const modalTitle = document.getElementById('modalTitle');
-const modalImage = document.getElementById('modalImage');
-const modalDescription = document.getElementById('modalDescription');
-const modalCategory = document.getElementById('modalCategory');
-const modalDate = document.getElementById('modalDate');
-const whatsappLink = document.getElementById('whatsappLink');
-const emailLink = document.getElementById('emailLink');
-const backToGallery = document.getElementById('backToGallery');
-const closeBtn = document.querySelectorAll('.close-btn');
+// Modal Elements - Lazy initialization to avoid null references
+let modal = null;
+let modalTitle = null;
+let modalImage = null;
+let modalDescription = null;
+let modalCategory = null;
+let modalDate = null;
+let whatsappLink = null;
+let emailLink = null;
+let backToGallery = null;
+let closeBtn = null;
+
+// Initialize modal elements safely
+function initializeModalElements() {
+    modal = document.getElementById('designModal');
+    modalTitle = document.getElementById('modalTitle');
+    modalImage = document.getElementById('modalImage');
+    modalDescription = document.getElementById('modalDescription');
+    modalCategory = document.getElementById('modalCategory');
+    modalDate = document.getElementById('modalDate');
+    whatsappLink = document.getElementById('whatsappLink');
+    emailLink = document.getElementById('emailLink');
+    backToGallery = document.getElementById('backToGallery');
+    closeBtn = document.querySelectorAll('.close-btn');
+}
 
 // WhatsApp Configuration - FIXED PHONE NUMBER
 const WHATSAPP_NUMBER = '+2348165262854';
@@ -45,25 +63,39 @@ let videos = [];
 const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/AdieleSolomon/Image-Gallery/main/gallery.json';
 const GITHUB_VIDEOS_URL = 'https://raw.githubusercontent.com/AdieleSolomon/Image-Gallery/main/videos.json';
 
-// Loading state elements
-const galleryLoading = document.getElementById('galleryLoading');
-const galleryError = document.getElementById('galleryError');
-const galleryEmpty = document.getElementById('galleryEmpty');
-const galleryContainer = document.getElementById('designGallery');
-const retryLoadGallery = document.getElementById('retryLoadGallery');
-const lastUpdatedDate = document.getElementById('lastUpdatedDate');
-const currentYear = document.getElementById('currentYear');
+// Loading state elements - Initialize lazily
+let galleryLoading = null;
+let galleryError = null;
+let galleryEmpty = null;
+let galleryContainer = null;
+let retryLoadGallery = null;
+let lastUpdatedDate = null;
+let currentYear = null;
+let videosLoading = null;
+let videosError = null;
+let videosEmpty = null;
+let videosGrid = null;
+let retryLoadVideos = null;
 
-// Videos state elements
-const videosLoading = document.getElementById('videosLoading');
-const videosError = document.getElementById('videosError');
-const videosEmpty = document.getElementById('videosEmpty');
-const videosGrid = document.getElementById('videosGrid');
-const retryLoadVideos = document.getElementById('retryLoadVideos');
-
-// Set current year in footer
-if (currentYear) {
-    currentYear.textContent = new Date().getFullYear();
+// Function to initialize loading state elements
+function initializeLoadingElements() {
+    galleryLoading = document.getElementById('galleryLoading');
+    galleryError = document.getElementById('galleryError');
+    galleryEmpty = document.getElementById('galleryEmpty');
+    galleryContainer = document.getElementById('designGallery');
+    retryLoadGallery = document.getElementById('retryLoadGallery');
+    lastUpdatedDate = document.getElementById('lastUpdatedDate');
+    currentYear = document.getElementById('currentYear');
+    videosLoading = document.getElementById('videosLoading');
+    videosError = document.getElementById('videosError');
+    videosEmpty = document.getElementById('videosEmpty');
+    videosGrid = document.getElementById('videosGrid');
+    retryLoadVideos = document.getElementById('retryLoadVideos');
+    
+    // Set current year in footer
+    if (currentYear) {
+        currentYear.textContent = new Date().getFullYear();
+    }
 }
 
 // Initialize WhatsApp CTA Button in Footer
@@ -72,6 +104,7 @@ function initWhatsAppCTA() {
     whatsappCTA.href = getWhatsAppUrl(`Hello ${BUSINESS_NAME}! I would like to inquire about your services.`);
     whatsappCTA.className = 'whatsapp-cta';
     whatsappCTA.target = '_blank';
+    whatsappCTA.rel = 'noopener noreferrer';
     whatsappCTA.innerHTML = '<i class="fab fa-whatsapp"></i>';
     whatsappCTA.title = 'Chat with us on WhatsApp';
     
@@ -85,7 +118,7 @@ function getWhatsAppUrl(message) {
 
 // Function to get design inquiry message
 function getDesignInquiryMessage(design) {
-    return `Hello ${BUSINESS_NAME}!%0A%0AI'm interested in your "${design.title}" design.%0A%0ADesign Details:%0A• Title: ${design.title}%0A• Category: ${design.category || 'Interior Design'}%0A%0APlease send me more information about this design, pricing details, and portfolio.`;
+    return `Hello ${BUSINESS_NAME}!\n\nI'm interested in your "${design.title}" design.\n\nDesign Details:\n• Title: ${design.title}\n• Category: ${design.category || 'Interior Design'}\n\nPlease send me more information about this design, pricing details, and portfolio.`;
 }
 
 // Load all data from GitHub
@@ -285,10 +318,10 @@ function createDesignCard(design, index) {
     designCard.innerHTML = `
         <div class="design-img-container">
             <img src="${design.image}" 
-                 alt="${design.title}" 
-                 class="design-img"
-                 loading="lazy"
-                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1615529328331-f8917597711f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'; this.alt='Image not available'">
+                    alt="${design.title}" 
+                    class="design-img"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1615529328331-f8917597711f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'; this.alt='Image not available'">
         </div>
         <div class="design-info">
             <h3>${design.title}</h3>
@@ -296,9 +329,10 @@ function createDesignCard(design, index) {
             ${design.category ? `<span class="design-category">${design.category}</span>` : ''}
             ${design.date ? `<span class="design-date">${design.date}</span>` : ''}
             <a href="${whatsappUrl}" 
-               class="btn design-quick-whatsapp" 
-               target="_blank" 
-               style="margin-top: 15px; background-color: #25D366; border: none; padding: 8px 15px; font-size: 0.9rem;">
+                class="btn design-quick-whatsapp" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style="margin-top: 15px; background-color: #25D366; border: none; padding: 8px 15px; font-size: 0.9rem;">
                 <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
             </a>
         </div>
@@ -306,10 +340,17 @@ function createDesignCard(design, index) {
     
     // Add click event for entire card to open modal
     designCard.addEventListener('click', (e) => {
-        // Don't open modal if WhatsApp button was clicked
-        if (!e.target.closest('.design-quick-whatsapp')) {
-            openDesignModal(design);
+        // Check if WhatsApp button or any of its children were clicked
+        const whatsappButton = e.target.closest('.design-quick-whatsapp');
+        
+        if (whatsappButton) {
+            // Stop propagation and let the link work normally
+            e.stopPropagation();
+            return;
         }
+        
+        // Open modal for any other click on the card
+        openDesignModal(design);
     });
     
     return designCard;
@@ -333,18 +374,18 @@ function createVideoCard(video, index) {
     // Create video embed or placeholder
     const videoEmbed = videoId 
         ? `<div class="video-container">
-               <iframe src="https://www.youtube.com/embed/${videoId}" 
-                       frameborder="0" 
-                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                       allowfullscreen
-                       loading="lazy">
-               </iframe>
-           </div>`
-        : `<div class="video-container">
-               <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #000; color: #fff;">
-                   <p>Video unavailable</p>
-               </div>
-           </div>`;
+                <iframe src="https://www.youtube.com/embed/${videoId}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        loading="lazy">
+                </iframe>
+            </div>`
+            : `<div class="video-container">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #000; color: #fff;">
+                    <p>Video unavailable</p>
+                </div>
+            </div>`;
     
     videoCard.innerHTML = `
         ${videoEmbed}
@@ -421,6 +462,11 @@ function loadFallbackVideos() {
 
 // Open Modal when Design Image is Clicked
 function openDesignModal(design) {
+    if (!modal || !modalTitle || !modalImage || !modalDescription) {
+        console.error('Modal elements not properly initialized');
+        return;
+    }
+    
     modalTitle.textContent = design.title;
     modalImage.src = design.image;
     modalImage.alt = design.title;
@@ -439,119 +485,191 @@ function openDesignModal(design) {
     
     // Create WhatsApp message
     const whatsappMessage = getDesignInquiryMessage(design);
-    whatsappLink.href = getWhatsAppUrl(whatsappMessage);
+    if (whatsappLink) {
+        const whatsappUrl = getWhatsAppUrl(whatsappMessage);
+        whatsappLink.href = whatsappUrl;
+        whatsappLink.target = '_blank';
+        whatsappLink.rel = 'noopener noreferrer';
+        console.log('WhatsApp link set:', whatsappUrl);
+    } else {
+        console.warn('WhatsApp link element not found');
+    }
     
     // Create Email link
     const emailSubject = `Inquiry about ${design.title} Design - ${BUSINESS_NAME}`;
     const emailBody = `Hello ${BUSINESS_NAME} Team,\n\nI'm interested in your "${design.title}" design.\n\nDesign Details:\n• Title: ${design.title}\n• Category: ${design.category || 'Interior Design'}\n• Description: ${design.description || 'No description available'}\n\nPlease provide me with more information about:\n1. Detailed specifications\n2. Pricing information\n3. Timeline for completion\n4. Any similar projects you've done\n\nThank you for your assistance.\n\nBest regards,\n[Your Name]`;
-    emailLink.href = `mailto:${BUSINESS_EMAIL}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    if (emailLink) {
+        emailLink.href = `mailto:${BUSINESS_EMAIL}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    }
     
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    
+    // Prevent click inside modal from closing it
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
 }
 
 // Close Modal
 function closeModal() {
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
 
 // Add close button event listeners
-if (closeBtn.length > 0) {
-    closeBtn.forEach(btn => {
-        btn.addEventListener('click', closeModal);
-    });
-}
-
-if (backToGallery) {
-    backToGallery.addEventListener('click', closeModal);
-}
-
-// Close Modal when clicking outside content
-window.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        closeModal();
-    }
-});
-
-// Contact Form Submission to WhatsApp
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Get form values
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const phone = document.getElementById('phone').value;
-        const message = document.getElementById('message').value;
-        
-        // Create WhatsApp message
-        const whatsappMessage = `Hello ${BUSINESS_NAME}!%0A%0ANew Contact Inquiry:%0A%0A• Name: ${name || 'Not provided'}%0A• Email: ${email || 'Not provided'}%0A• Phone: ${phone || 'Not provided'}%0A• Message: ${message || 'No message provided'}%0A%0AThis inquiry was submitted through your website.`;
-        
-        // Open WhatsApp with pre-filled message
-        window.open(getWhatsAppUrl(whatsappMessage), '_blank');
-        
-        // Show success message
-        alert('Thank you for your message! You will be redirected to WhatsApp to send your inquiry.');
-        
-        // Reset form
-        this.reset();
-    });
-}
-
-// Retry loading gallery
-if (retryLoadGallery) {
-    retryLoadGallery.addEventListener('click', loadGalleryData);
-}
-
-// Retry loading videos
-if (retryLoadVideos) {
-    retryLoadVideos.addEventListener('click', loadVideosData);
-}
-
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-            const headerHeight = document.querySelector('header').offsetHeight;
-            const targetPosition = targetElement.offsetTop - headerHeight;
-            
-            window.scrollTo({
-                top: targetPosition,
-                behavior: 'smooth'
+function setupCloseButtonListeners() {
+    if (closeBtn && closeBtn.length > 0) {
+        closeBtn.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeModal();
             });
-        }
+        });
+    }
+    
+    if (backToGallery) {
+        backToGallery.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeModal();
+        });
+    }
+    
+    // Close Modal when clicking outside content
+    if (modal) {
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+}
+
+// Attach WhatsApp and Email link handlers AFTER modal is created
+function attachModalLinkHandlers() {
+    if (whatsappLink) {
+        // Remove any existing listeners to prevent duplicates
+        const newWhatsappLink = whatsappLink.cloneNode(true);
+        whatsappLink.parentNode.replaceChild(newWhatsappLink, whatsappLink);
+        whatsappLink = newWhatsappLink;
+        
+        whatsappLink.addEventListener('click', function(e) {
+            // Let the link navigate normally
+            console.log('WhatsApp button clicked:', this.href);
+        });
+    }
+    
+    if (emailLink) {
+        // Remove any existing listeners to prevent duplicates
+        const newEmailLink = emailLink.cloneNode(true);
+        emailLink.parentNode.replaceChild(newEmailLink, emailLink);
+        emailLink = newEmailLink;
+        
+        emailLink.addEventListener('click', function(e) {
+            // Let the link navigate normally
+            console.log('Email button clicked:', this.href);
+        });
+    }
+}
+
+// Contact Form Submission to WhatsApp - Initialize in DOMContentLoaded
+function initializeContactForm() {
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
+            
+            // Create WhatsApp message
+            const whatsappMessage = `Hello ${BUSINESS_NAME}!\n\nNew Contact Inquiry:\n\n• Name: ${name || 'Not provided'}\n• Email: ${email || 'Not provided'}\n• Phone: ${phone || 'Not provided'}\n• Message: ${message || 'No message provided'}\n\nThis inquiry was submitted through your website.`;
+            
+            // Open WhatsApp with pre-filled message
+            window.open(getWhatsAppUrl(whatsappMessage), '_blank');
+            
+            // Show success message
+            alert('Thank you for your message! You will be redirected to WhatsApp to send your inquiry.');
+            
+            // Reset form
+            this.reset();
+        });
+    }
+}
+
+// Smooth scrolling for anchor links - Initialize in DOMContentLoaded
+function initializeSmoothScrolling() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+            
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                const headerHeight = document.querySelector('header').offsetHeight;
+                const targetPosition = targetElement.offsetTop - headerHeight;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
     });
-});
+}
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize all DOM elements first
+    initializeNavigation();
+    initializeModalElements();
+    initializeLoadingElements();
+    initializeContactForm();
+    initializeSmoothScrolling();
+    
+    // Setup close button listeners
+    setupCloseButtonListeners();
+    
     // Initialize WhatsApp CTA button
     initWhatsAppCTA();
     
     // Load all data from GitHub
     loadAllData();
     
+    // Setup retry buttons if they exist
+    if (retryLoadGallery) {
+        retryLoadGallery.addEventListener('click', loadGalleryData);
+    }
+    if (retryLoadVideos) {
+        retryLoadVideos.addEventListener('click', loadVideosData);
+    }
+    
     // Add resize listener to handle mobile menu on orientation change
     window.addEventListener('resize', () => {
-        if (window.innerWidth > 767) {
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks && window.innerWidth > 767) {
             navLinks.classList.remove('active');
         }
     });
 });
 
 // Image error handler for modal
-modalImage.onerror = function() {
-    this.src = 'https://images.unsplash.com/photo-1615529328331-f8917597711f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-    this.alt = 'Image not available';
-};
+if (modalImage) {
+    modalImage.onerror = function() {
+        this.src = 'https://images.unsplash.com/photo-1615529328331-f8917597711f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+        this.alt = 'Image not available';
+    };
+}
 
 // Handle lazy loading images
 if ('IntersectionObserver' in window) {
